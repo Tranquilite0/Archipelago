@@ -41,10 +41,10 @@ class RuleFlag(IntEnum):
     """
     HAS_STONES = auto()
     """Requires the necessary number of stones. Adjustable via option."""
-    PHOENIX_CUTSCENE = auto()
+    MOUNTAIN_KING = auto()
     """
-    Requires the Phoenix cutscene:
-    Access to the Mountain King
+    Requires the Mountain King check and (Phoenix cutscene):
+    Path to the Mountain King
     Both Dancing Grandmas
     The 3 Red-Hot Items
     """
@@ -94,8 +94,28 @@ def has_stones(state: CollectionState, player: int) -> bool:
     return state.has_group("stones", player, count)
 
 
-def has_phoenix_cutscene(state: CollectionState, player: int) -> bool:
-    return state.can_reach_location(NPCRewardName.MOUNTAIN_KING, player)
+def mountain_king_access(state: CollectionState, player: int) -> bool:
+    return (
+        # This first region check is only needed if a way of selectively opening worlds is discovered.
+        # state.can_reach_region(RegionName.MOUNTAIN_HUB_NORTH_SLOPE) and
+
+        # Two paths that lead to the hall of the mountain king
+        state.has_any([NPCName.BOY_MUSHROOM_SHOES, NPCName.GRANDPA], player)
+        and state.has_all(
+            [
+                NPCName.BOY,
+                NPCName.GRANDPA3,
+                NPCName.MOUNTAIN_KING,
+                NPCName.DANCING_GRANDMA,
+                NPCName.DANCING_GRANDMA2,
+                ItemName.REDHOTBALL,
+                ItemName.REDHOTMIRROR,
+                ItemName.REDHOTSTICK,
+            ],
+            player,
+        )
+        
+    )
 
 
 rule_for_flag = {
@@ -106,7 +126,7 @@ rule_for_flag = {
     RuleFlag.HAS_MAGIC: has_magic,
     RuleFlag.HAS_SWORD: has_sword,
     RuleFlag.HAS_STONES: has_stones,
-    RuleFlag.PHOENIX_CUTSCENE: has_phoenix_cutscene,
+    RuleFlag.MOUNTAIN_KING: mountain_king_access,
 }
 
 # Many locations depend on one or two NPC releases so rather than create regions to hold one location,
@@ -146,20 +166,12 @@ location_dependencies: Dict[str, List[str]] = {
     NPCRewardName.MAGIC_FLARE_MERMAID: [NPCName.MERMAID_MAGIC_FLARE, NPCName.MERMAID_BUBBLE_ARMOR],
     NPCRewardName.REDHOT_STICK_MERMAID: [NPCName.MERMAID_RED_HOT_STICK],
     NPCRewardName.LUE: [NPCName.LUE, NPCName.DOLPHIN_SAVES_LUE, NPCName.MERMAID_PEARL],
-    # Logical mermaids tears. TODO: move to separate list for optional logic toggle
     NPCRewardName.MERMAID_QUEEN: [NPCName.MERMAID_QUEEN],
     NPCRewardName.ANGELFISH_SOUL_OF_SHIELD: [NPCName.ANGELFISH_SOUL_OF_SHIELD],
     LairName.MERMAID3: [ItemName.MERMAIDSTEARS],
     LairName.MERMAID_STATUE_BLESTER: [ItemName.MERMAIDSTEARS],
     ChestName.DUREAN_CRITICAL_SWORD: [ItemName.MERMAIDSTEARS],
     # Act 4 - Mountain of Souls
-    NPCRewardName.MOUNTAIN_KING: [
-        NPCName.DANCING_GRANDMA,
-        NPCName.DANCING_GRANDMA2,
-        ItemName.REDHOTBALL,
-        ItemName.REDHOTMIRROR,
-        ItemName.REDHOTSTICK,
-    ],
     NPCRewardName.MUSHROOM_SHOES_BOY: [NPCName.BOY_MUSHROOM_SHOES],
     NPCRewardName.EMBLEM_E_SNAIL: [NPCName.SNAIL_EMBLEM_E],
     # Also includes path from lune to sleeping mushroom for the two locations locked behind mushroom's dream.

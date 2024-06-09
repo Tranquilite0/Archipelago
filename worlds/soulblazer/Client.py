@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, NamedTuple, TYPE_CHECKING, Set
 from .Names import Addresses, ItemID, MapID
 from .Names.ArchipelagoID import BASE_ID, LAIR_ID_OFFSET, NPC_REWARD_OFFSET
 from .Locations import (
-    SoulBlazerLocationData,
     address_for_location,
     all_locations_table,
     LocationType,
@@ -14,7 +13,7 @@ from .Locations import (
     npc_reward_table,
     lair_table,
 )
-from .Items import SoulBlazerItemData, all_items_table
+from .Items import all_items_table
 from .Util import encode_string, is_bit_set, Rectangle
 from .Lair import LairData, unpack_lair_data
 from .Entity import EntityData, unpack_entity_data

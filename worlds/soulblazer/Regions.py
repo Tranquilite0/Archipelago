@@ -425,12 +425,8 @@ class ExitData(NamedTuple):
     """The destination region name."""
     has_all: List[str] = []
     """List of item names, all of which are required to use this exit."""
-    # TODO: Might need to refactor this data structure if any location has multiple 'any' dependencies
-    # TODO: if the only any ends up being swords/magic then change this to flag instead?
-    has_any: List[str] = []
-    """List of item names, where only one are required to use this exit."""
-    # TODO: May have to refactor data structure if location reachable requirements are needed
     rule_flag: RuleFlag = RuleFlag.NONE
+    """Optional rule flag assotiated with this exit."""
 
 
 exits_for_region: Dict[str, List[ExitData]] = {
@@ -498,11 +494,7 @@ exits_for_region: Dict[str, List[ExitData]] = {
     RegionName.MOUNTAIN_HUB_NORTH_SLOPE: [
         ExitData(RegionName.LAYNOLE, [ItemName.MUSHROOMSHOES]),
         ExitData(RegionName.LUNE, [NPCName.GIRL3, NPCName.GRANDPA4, NPCName.GRANDPA_LUNE, ItemName.LUCKYBLADE]),
-        ExitData(
-            RegionName.MOUNTAIN_KING,
-            [NPCName.BOY, NPCName.GRANDPA3, NPCName.MOUNTAIN_KING],
-            [NPCName.BOY_MUSHROOM_SHOES, NPCName.GRANDPA],
-        ),
+        ExitData(RegionName.MOUNTAIN_KING, rule_flag=RuleFlag.MOUNTAIN_KING),
         ExitData(
             RegionName.NOME,
             [NPCName.GIRL3, NPCName.GRANDPA4, NPCName.MUSHROOM2, NPCName.GRANDPA5, NPCName.MOUNTAIN_KING, NPCName.NOME],
@@ -559,8 +551,7 @@ exits_for_region: Dict[str, List[ExitData]] = {
         ExitData(
             RegionName.DEATHTOLL,
             [ItemName.SOULARMOR, ItemName.SOULBLADE, ItemName.PHOENIX],
-            [],
-            RuleFlag.PHOENIX_CUTSCENE,
+            RuleFlag.MOUNTAIN_KING,
         )
     ],
 }
@@ -597,19 +588,17 @@ exits_for_region_open_deathtoll: Dict[str, List[ExitData]] = {
 def get_rule_for_exit(data: ExitData, player: int) -> Callable[[CollectionState], bool]:
     """Returns the access rule for the given exit."""
 
-    if not data.has_all and not data.has_any:
+    flag_rule = rule_for_flag[data.rule_flag]
 
-        def rule_simple(state: CollectionState) -> bool:
-            return rule_for_flag[data.rule_flag](state, player)
+    if not data.has_all:
 
-        return rule_simple
+        def rule(state: CollectionState) -> bool:
+            return flag_rule(state, player)
+
+        return rule
 
     def rule(state: CollectionState) -> bool:
-        return (
-            rule_for_flag[data.rule_flag](state, player)
-            and state.has_all(data.has_all, player)
-            and (not data.has_any or state.has_any(data.has_any, player))
-        )
+        return flag_rule(state, player) and state.has_all(data.has_all, player)
 
     return rule
 

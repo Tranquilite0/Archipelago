@@ -11,8 +11,8 @@ from Utils import read_snes_rom
 from worlds.AutoWorld import World
 from worlds.Files import APDeltaPatch
 from .Names import Addresses, ItemID
-from .Items import SoulBlazerItem, SoulBlazerItemData
-from .Locations import SoulBlazerLocation, LocationType, SoulBlazerLocationData
+from .Items import SoulBlazerItem
+from .Locations import SoulBlazerLocation, LocationType
 from .patches import get_patch_bytes
 
 if TYPE_CHECKING:

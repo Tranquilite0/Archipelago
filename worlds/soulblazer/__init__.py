@@ -9,7 +9,6 @@ from .Client import SoulBlazerSNIClient
 from .Options import SoulBlazerOptions  # the options we defined earlier
 from .Items import (
     SoulBlazerItem,
-    SoulBlazerItemData,
     all_items_table,
     repeatable_items_table,
     create_itempool,
