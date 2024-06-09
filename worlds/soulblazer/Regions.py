@@ -5,7 +5,7 @@ from .Items import swords_table, stones_table, redhots_table
 from .Names import RegionName, ItemName, LairName, ChestName, NPCName, NPCRewardName
 from .Locations import SoulBlazerLocation, all_locations_table
 from .Options import SoulBlazerOptions
-from .Rules import no_requirement, RuleFlag, rule_for_flag
+from .Rules import RuleData, FlagRuleData, HasAllRuleData, HasAnyRuleData, RuleFlag, rule_for_flag
 
 if TYPE_CHECKING:
     from . import SoulBlazerWorld
@@ -423,14 +423,7 @@ locations_for_region: Dict[str, List[str]] = {
 class ExitData(NamedTuple):
     destination: str
     """The destination region name."""
-    has_all: List[str] = []
-    """List of item names, all of which are required to use this exit."""
-    # TODO: Might need to refactor this data structure if any location has multiple 'any' dependencies
-    # TODO: if the only any ends up being swords/magic then change this to flag instead?
-    has_any: List[str] = []
-    """List of item names, where only one are required to use this exit."""
-    # TODO: May have to refactor data structure if location reachable requirements are needed
-    rule_flag: RuleFlag = RuleFlag.NONE
+    rule_data: RuleData = RuleData()
 
 
 exits_for_region: Dict[str, List[ExitData]] = {
@@ -439,128 +432,125 @@ exits_for_region: Dict[str, List[ExitData]] = {
     ],
     # Act 1 Exits
     RegionName.TRIAL_ROOM: [
-        ExitData(RegionName.GRASS_VALLEY_WEST, rule_flag=RuleFlag.HAS_SWORD),
+        ExitData(RegionName.GRASS_VALLEY_WEST, FlagRuleData(flag=RuleFlag.HAS_SWORD)),
     ],
     RegionName.GRASS_VALLEY_WEST: [
-        ExitData(RegionName.GRASS_VALLEY_EAST, [NPCName.BRIDGE_GUARD]),
+        ExitData(RegionName.GRASS_VALLEY_EAST, HasAllRuleData(items=[NPCName.BRIDGE_GUARD])),
         ExitData(RegionName.UNDERGROUND_CASTLE_WEST),
-        ExitData(RegionName.GREENWOOD, [NPCName.OLD_WOMAN, NPCName.VILLAGE_CHIEF]),
+        ExitData(RegionName.GREENWOOD, HasAllRuleData(items=[NPCName.OLD_WOMAN, NPCName.VILLAGE_CHIEF])),
     ],
     RegionName.GRASS_VALLEY_EAST: [
-        ExitData(RegionName.GRASS_VALLEY_TREASURE_ROOM, [NPCName.IVY_CHEST_ROOM]),
-        ExitData(RegionName.LEOS_PAINTING, [NPCName.ARCHITECT, NPCName.LEOS_HOUSE, ItemName.LEOSBRUSH]),
+        ExitData(RegionName.GRASS_VALLEY_TREASURE_ROOM, HasAllRuleData(items=[NPCName.IVY_CHEST_ROOM])),
+        ExitData(RegionName.LEOS_PAINTING, HasAllRuleData(items=[NPCName.ARCHITECT, NPCName.LEOS_HOUSE, ItemName.LEOSBRUSH])),
     ],
     RegionName.UNDERGROUND_CASTLE_WEST: [
-        ExitData(RegionName.UNDERGROUND_CASTLE_EAST, [NPCName.BRIDGE_GUARD, NPCName.WATER_MILL])
+        ExitData(RegionName.UNDERGROUND_CASTLE_EAST, HasAllRuleData(items=[NPCName.BRIDGE_GUARD, NPCName.WATER_MILL]))
     ],
     # Act 2 Exits
     RegionName.GREENWOOD: [
         ExitData(RegionName.LOST_MARSHES_SOUTH),
-        ExitData(RegionName.SEABED_SANCTUARY_HUB_SOUTHERTA, [NPCName.GREENWOODS_GUARDIAN]),
+        ExitData(RegionName.SEABED_SANCTUARY_HUB_SOUTHERTA, HasAllRuleData(items=[NPCName.GREENWOODS_GUARDIAN])),
     ],
     RegionName.LOST_MARSHES_SOUTH: [
-        ExitData(RegionName.LOST_MARSHES_NORTH, [ItemName.TURBOSLEAVES]),
+        ExitData(RegionName.LOST_MARSHES_NORTH, HasAllRuleData(items=[ItemName.TURBOSLEAVES])),
     ],
     RegionName.LOST_MARSHES_NORTH: [
-        ExitData(RegionName.LIGHT_SHRINE_DARK, [ItemName.SOUL_LIGHT]),
+        ExitData(RegionName.LIGHT_SHRINE_DARK, HasAllRuleData(items=[ItemName.SOUL_LIGHT])),
     ],
     # Act 3 Exits
     RegionName.SEABED_SANCTUARY_HUB_SOUTHERTA: [
-        ExitData(RegionName.SEABED_SANCTUARY_SOUTH, [NPCName.MERMAID_BUBBLE_ARMOR]),
-        ExitData(RegionName.SEABED_SANCTUARY_WEST, [NPCName.MERMAID_PEARL, NPCName.MERMAID4]),
-        ExitData(RegionName.SEABED_SANCTUARY_EAST, [NPCName.DOLPHIN2]),
-        ExitData(RegionName.MOUNTAIN_HUB_NORTH_SLOPE, [NPCName.MERMAID_QUEEN]),
+        ExitData(RegionName.SEABED_SANCTUARY_SOUTH, HasAllRuleData(items=[NPCName.MERMAID_BUBBLE_ARMOR])),
+        ExitData(RegionName.SEABED_SANCTUARY_WEST, HasAllRuleData(items=[NPCName.MERMAID_PEARL, NPCName.MERMAID4])),
+        ExitData(RegionName.SEABED_SANCTUARY_EAST, HasAllRuleData(items=[NPCName.DOLPHIN2])),
+        ExitData(RegionName.MOUNTAIN_HUB_NORTH_SLOPE, HasAllRuleData(items=[NPCName.MERMAID_QUEEN])),
     ],
     RegionName.SEABED_SANCTUARY_SOUTH: [
-        ExitData(RegionName.SEABED_SANCTUARY_WEST, [NPCName.MERMAID_PEARL]),
-        ExitData(RegionName.SEABED_SANCTUARY_SOUTHEAST, [NPCName.ANGELFISH_SOUL_OF_SHIELD]),
-        ExitData(RegionName.SEABED_HUB, [ItemName.BUBBLEARMOR]),
+        ExitData(RegionName.SEABED_SANCTUARY_WEST, HasAllRuleData(items=[NPCName.MERMAID_PEARL])),
+        ExitData(RegionName.SEABED_SANCTUARY_SOUTHEAST, HasAllRuleData(items=[NPCName.ANGELFISH_SOUL_OF_SHIELD])),
+        ExitData(RegionName.SEABED_HUB, HasAllRuleData(items=[ItemName.BUBBLEARMOR])),
     ],
     RegionName.SEABED_SANCTUARY_WEST: [
-        ExitData(RegionName.SEABED_SANCTUARY_SOUTHWEST, [NPCName.DOLPHIN_PEARL]),
+        ExitData(RegionName.SEABED_SANCTUARY_SOUTHWEST, HasAllRuleData(items=[NPCName.DOLPHIN_PEARL])),
     ],
     RegionName.SEABED_SANCTUARY_EAST: [
-        ExitData(RegionName.SEABED_SANCTUARY_SOUTHEAST, [NPCName.ANGELFISH_SOUL_OF_SHIELD, NPCName.MERMAID5])
+        ExitData(RegionName.SEABED_SANCTUARY_SOUTHEAST, HasAllRuleData(items=[NPCName.ANGELFISH_SOUL_OF_SHIELD, NPCName.MERMAID5]))
     ],
     RegionName.SEABED_HUB: [
-        ExitData(RegionName.ROCKBIRD, [NPCName.MERMAID_STATUE_ROCKBIRD]),
-        ExitData(RegionName.DUREAN, [NPCName.MERMAID_STATUE_DUREAN]),
-        ExitData(RegionName.BLESTER, [NPCName.MERMAID_STATUE_BLESTER]),
-        ExitData(RegionName.GHOST_SHIP, [NPCName.MERMAID_STATUE_GHOST_SHIP]),
+        ExitData(RegionName.ROCKBIRD, HasAllRuleData(items=[NPCName.MERMAID_STATUE_ROCKBIRD])),
+        ExitData(RegionName.DUREAN, HasAllRuleData(items=[NPCName.MERMAID_STATUE_DUREAN])),
+        ExitData(RegionName.BLESTER, HasAllRuleData(items=[NPCName.MERMAID_STATUE_BLESTER])),
+        ExitData(RegionName.GHOST_SHIP, HasAllRuleData(items=[NPCName.MERMAID_STATUE_GHOST_SHIP])),
     ],
     RegionName.GHOST_SHIP: [
         ExitData(
             RegionName.SEABED_SECRET_CAVE,
-            [NPCName.MERMAID_PEARL, NPCName.DOLPHIN_SECRET_CAVE, ItemName.DREAMROD, ItemName.BIGPEARL],
+            HasAllRuleData(items=[NPCName.MERMAID_PEARL, NPCName.DOLPHIN_SECRET_CAVE, ItemName.DREAMROD, ItemName.BIGPEARL]),
         ),
     ],
     # Act 4 Exits
     RegionName.MOUNTAIN_HUB_NORTH_SLOPE: [
-        ExitData(RegionName.LAYNOLE, [ItemName.MUSHROOMSHOES]),
-        ExitData(RegionName.LUNE, [NPCName.GIRL3, NPCName.GRANDPA4, NPCName.GRANDPA_LUNE, ItemName.LUCKYBLADE]),
+        ExitData(RegionName.LAYNOLE, HasAllRuleData(items=[ItemName.MUSHROOMSHOES])),
+        ExitData(RegionName.LUNE, HasAllRuleData(items=[NPCName.GIRL3, NPCName.GRANDPA4, NPCName.GRANDPA_LUNE, ItemName.LUCKYBLADE])),
         ExitData(
             RegionName.MOUNTAIN_KING,
-            [NPCName.BOY, NPCName.GRANDPA3, NPCName.MOUNTAIN_KING],
-            [NPCName.BOY_MUSHROOM_SHOES, NPCName.GRANDPA],
+            HasAllRuleData(items=[NPCName.BOY, NPCName.GRANDPA3, NPCName.MOUNTAIN_KING],
+            next=HasAnyRuleData(items=[NPCName.BOY_MUSHROOM_SHOES, NPCName.GRANDPA]))
         ),
         ExitData(
             RegionName.NOME,
-            [NPCName.GIRL3, NPCName.GRANDPA4, NPCName.MUSHROOM2, NPCName.GRANDPA5, NPCName.MOUNTAIN_KING, NPCName.NOME],
+            HasAllRuleData(items=[NPCName.GIRL3, NPCName.GRANDPA4, NPCName.MUSHROOM2, NPCName.GRANDPA5, NPCName.MOUNTAIN_KING, NPCName.NOME]),
         ),
     ],
-    RegionName.NOME: [ExitData(RegionName.LEOS_LAB_START, [])],
+    RegionName.NOME: [ExitData(RegionName.LEOS_LAB_START)],
     # Act 5 Exits
     RegionName.LEOS_LAB_START: [
-        ExitData(RegionName.LEOS_LAB_BASEMENT_1_METAL, rule_flag=RuleFlag.CAN_CUT_METAL),
-        ExitData(RegionName.LEOS_LAB_MAIN, [NPCName.GREAT_DOOR_ZANTETSU_SWORD]),
-        ExitData(RegionName.LEOS_LAB_2ND_FLOOR, [NPCName.STEPS_UPSTAIRS, NPCName.GREAT_DOOR_MODEL_TOWNS]),
-        ExitData(RegionName.LEOS_LAB_POWER_PLANT, [NPCName.STAIRS_POWER_PLANT]),
+        ExitData(RegionName.LEOS_LAB_BASEMENT_1_METAL, FlagRuleData(flag=RuleFlag.CAN_CUT_METAL)),
+        ExitData(RegionName.LEOS_LAB_MAIN, HasAllRuleData(items=[NPCName.GREAT_DOOR_ZANTETSU_SWORD])),
+        ExitData(RegionName.LEOS_LAB_2ND_FLOOR, HasAllRuleData(items=[NPCName.STEPS_UPSTAIRS, NPCName.GREAT_DOOR_MODEL_TOWNS])),
+        ExitData(RegionName.LEOS_LAB_POWER_PLANT, HasAllRuleData(items=[NPCName.STAIRS_POWER_PLANT])),
     ],
     RegionName.LEOS_LAB_BASEMENT_1_METAL: [
-        ExitData(RegionName.LEOS_LAB_BASEMENT_2, [ItemName.ICEARMOR]),
+        ExitData(RegionName.LEOS_LAB_BASEMENT_2, HasAllRuleData(items=[ItemName.ICEARMOR])),
     ],
     RegionName.LEOS_LAB_2ND_FLOOR: [
-        ExitData(RegionName.LEOS_LAB_MODEL_TOWN_1, [NPCName.MODEL_TOWN1]),
-        ExitData(RegionName.LEOS_LAB_MODEL_TOWN_2, [NPCName.MODEL_TOWN2]),
-        ExitData(RegionName.LEOS_LAB_ATTIC, [NPCName.STEPS_MARIE]),
+        ExitData(RegionName.LEOS_LAB_MODEL_TOWN_1, HasAllRuleData(items=[NPCName.MODEL_TOWN1])),
+        ExitData(RegionName.LEOS_LAB_MODEL_TOWN_2, HasAllRuleData(items=[NPCName.MODEL_TOWN2])),
+        ExitData(RegionName.LEOS_LAB_ATTIC, HasAllRuleData(items=[NPCName.STEPS_MARIE])),
     ],
     RegionName.LEOS_LAB_ATTIC: [
-        ExitData(RegionName.MAGRIDD_CASTLE_TOWN, [NPCName.MARIE]),
+        ExitData(RegionName.MAGRIDD_CASTLE_TOWN, HasAllRuleData(items=[NPCName.MARIE])),
     ],
     # Act 6 Exits
     RegionName.MAGRIDD_CASTLE_TOWN: [
-        ExitData(RegionName.MAGRIDD_CASTLE_BASEMENT, rule_flag=RuleFlag.CAN_CUT_SPIRIT),
-        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER, [NPCName.SOLDIER_LEFT_TOWER, ItemName.PLATINUMCARD]),
-        ExitData(RegionName.MAGRIDD_CASTLE_RIGHT_TOWER, [NPCName.SOLDIER_RIGHT_TOWER, ItemName.VIPCARD]),
+        ExitData(RegionName.MAGRIDD_CASTLE_BASEMENT, FlagRuleData(flag=RuleFlag.CAN_CUT_SPIRIT)),
+        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER, HasAllRuleData(items=[NPCName.SOLDIER_LEFT_TOWER, ItemName.PLATINUMCARD])),
+        ExitData(RegionName.MAGRIDD_CASTLE_RIGHT_TOWER, HasAllRuleData(items=[NPCName.SOLDIER_RIGHT_TOWER, ItemName.VIPCARD])),
         ExitData(
             RegionName.WORLD_OF_EVIL,
-            [NPCName.SOLDIER_CASTLE, NPCName.KING_MAGRIDD],
-            rule_flag=RuleFlag.HAS_STONES,
+            HasAllRuleData(items=[NPCName.SOLDIER_CASTLE, NPCName.KING_MAGRIDD], next=FlagRuleData(flag=RuleFlag.HAS_STONES))
         ),
     ],
     RegionName.MAGRIDD_CASTLE_BASEMENT: [
-        ExitData(RegionName.MAGRIDD_CASTLE_BASEMENT_INVIS, [ItemName.SOUL_REALITY]),
+        ExitData(RegionName.MAGRIDD_CASTLE_BASEMENT_INVIS, HasAllRuleData(items=[ItemName.SOUL_REALITY])),
     ],
     RegionName.MAGRIDD_CASTLE_LEFT_TOWER: [
-        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER_INVIS, [ItemName.SOUL_REALITY]),
+        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER_INVIS, HasAllRuleData(items=[ItemName.SOUL_REALITY])),
     ],
     RegionName.MAGRIDD_CASTLE_RIGHT_TOWER: [
-        ExitData(RegionName.MAGRIDD_CASTLE_RIGHT_TOWER_INVIS, [ItemName.SOUL_REALITY]),
+        ExitData(RegionName.MAGRIDD_CASTLE_RIGHT_TOWER_INVIS, HasAllRuleData(items=[ItemName.SOUL_REALITY])),
     ],
     RegionName.MAGRIDD_CASTLE_RIGHT_TOWER_INVIS: [
-        ExitData(RegionName.MAGRIDD_CASTLE_LEO, [NPCName.DR_LEO, NPCName.SOLDIER_WITH_LEO, NPCName.SOLDIER_DOK])
+        ExitData(RegionName.MAGRIDD_CASTLE_LEO, HasAllRuleData(items=[NPCName.DR_LEO, NPCName.SOLDIER_WITH_LEO, NPCName.SOLDIER_DOK]))
     ],
     RegionName.MAGRIDD_CASTLE_LEO: [
         # The platinum card soldier blows up, letting you get in without platinum card
-        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER, [NPCName.SOLDIER_LEFT_TOWER])
+        ExitData(RegionName.MAGRIDD_CASTLE_LEFT_TOWER, HasAllRuleData(items=[NPCName.SOLDIER_LEFT_TOWER]))
     ],
     # Act 7 Exits
     RegionName.WORLD_OF_EVIL: [
         ExitData(
             RegionName.DEATHTOLL,
-            [ItemName.SOULARMOR, ItemName.SOULBLADE, ItemName.PHOENIX],
-            [],
-            RuleFlag.PHOENIX_CUTSCENE,
+            HasAllRuleData(items=[ItemName.SOULARMOR, ItemName.SOULBLADE, ItemName.PHOENIX], next=FlagRuleData(flag=RuleFlag.PHOENIX_CUTSCENE))
         )
     ],
 }
@@ -568,14 +558,14 @@ exits_for_region: Dict[str, List[ExitData]] = {
 exits_for_region_open_mode: Dict[str, List[ExitData]] = {
     # Grass Valley west now connects to all Act Hubs
     RegionName.GRASS_VALLEY_WEST: [
-        ExitData(RegionName.GRASS_VALLEY_EAST, [NPCName.BRIDGE_GUARD]),
+        ExitData(RegionName.GRASS_VALLEY_EAST, HasAllRuleData(items=[NPCName.BRIDGE_GUARD])),
         ExitData(RegionName.UNDERGROUND_CASTLE_WEST),
         ExitData(RegionName.GREENWOOD),
         ExitData(RegionName.SEABED_SANCTUARY_HUB_SOUTHERTA),
         ExitData(RegionName.MOUNTAIN_HUB_NORTH_SLOPE),
         ExitData(RegionName.LEOS_LAB_START),
         ExitData(RegionName.MAGRIDD_CASTLE_TOWN),
-        ExitData(RegionName.WORLD_OF_EVIL, rule_flag=RuleFlag.HAS_STONES),
+        ExitData(RegionName.WORLD_OF_EVIL, FlagRuleData(flag=RuleFlag.HAS_STONES)),
     ],
 }
 
@@ -584,11 +574,11 @@ exits_for_region_open_deathtoll: Dict[str, List[ExitData]] = {
     RegionName.WORLD_OF_EVIL: [
         ExitData(
             RegionName.DEATHTOLL,
-            [
+            HasAllRuleData(items=[
                 ItemName.SOULARMOR,
                 ItemName.SOULBLADE,
-                ItemName.PHOENIX,
-            ],
+                ItemName.PHOENIX
+            ]),
         )
     ],
 }
@@ -597,21 +587,7 @@ exits_for_region_open_deathtoll: Dict[str, List[ExitData]] = {
 def get_rule_for_exit(data: ExitData, player: int) -> Callable[[CollectionState], bool]:
     """Returns the access rule for the given exit."""
 
-    if not data.has_all and not data.has_any:
-
-        def rule_simple(state: CollectionState) -> bool:
-            return rule_for_flag[data.rule_flag](state, player)
-
-        return rule_simple
-
-    def rule(state: CollectionState) -> bool:
-        return (
-            rule_for_flag[data.rule_flag](state, player)
-            and state.has_all(data.has_all, player)
-            and (not data.has_any or state.has_any(data.has_any, player))
-        )
-
-    return rule
+    return data.rule_data.get_rule(player)
 
 
 def create_regions(world: "SoulBlazerWorld") -> None:
